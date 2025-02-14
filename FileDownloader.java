@@ -5,6 +5,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -58,7 +60,7 @@ public class FileDownloader {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(poppinsFont);
         } catch (Exception e) {
-            poppinsFont = new Font("poppins", Font.PLAIN, 16); // Fallback font
+            poppinsFont = new Font("SansSerif", Font.PLAIN, 16); // Fallback font
         }
 
         // Title Label
@@ -81,6 +83,7 @@ public class FileDownloader {
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
+        addRightClickMenu(urlTextField); // Add right-click menu
         frame.add(urlTextField);
 
         // Fetch URL Button
@@ -103,6 +106,7 @@ public class FileDownloader {
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
+        addRightClickMenu(saveLocationTextField); // Add right-click menu
         frame.add(saveLocationTextField);
 
         // Browse Button
@@ -140,6 +144,30 @@ public class FileDownloader {
         statusLabel.setFont(poppinsFont.deriveFont(Font.PLAIN, 14));
         statusLabel.setBounds(50, 390, 800, 25);
         frame.add(statusLabel);
+    }
+
+    private void addRightClickMenu(JTextField textField) {
+        JPopupMenu rightClickMenu = new JPopupMenu();
+        JMenuItem pasteItem = new JMenuItem("Paste");
+        JMenuItem copyItem = new JMenuItem("Copy");
+        JMenuItem clearItem = new JMenuItem("Clear");
+
+        pasteItem.addActionListener(e -> textField.paste());
+        copyItem.addActionListener(e -> textField.copy());
+        clearItem.addActionListener(e -> textField.setText(""));
+
+        rightClickMenu.add(pasteItem);
+        rightClickMenu.add(copyItem);
+        rightClickMenu.add(clearItem);
+
+        textField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    rightClickMenu.show(textField, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     private JButton createModernButton(String text, Color bgColor, Color hoverColor) {
