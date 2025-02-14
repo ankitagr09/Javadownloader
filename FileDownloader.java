@@ -23,6 +23,7 @@ public class FileDownloader {
     private JLabel statusLabel;
 
     public static void main(String[] args) {
+        // Create an instance of FileDownloader and call the method to show the GUI
         new FileDownloader().createAndShowGUI();
     }
 
