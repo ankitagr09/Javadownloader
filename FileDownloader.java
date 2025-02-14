@@ -48,7 +48,9 @@ public class FileDownloader {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null); // Center the window
-        frame.getContentPane().setBackground(new Color(245, 245, 245)); // Light gray background
+        frame.getContentPane().setBackground(new Color(245, 245, 245)); // Light gray background\
+        ImageIcon icon = new ImageIcon("icon.png");
+        frame.setIconImage(icon.getImage());
     }
 
     private void addUIComponents() {
