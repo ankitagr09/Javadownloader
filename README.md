@@ -1,7 +1,3 @@
-Here’s a **README.md** file for your `FileDownloader` application. This file provides an overview of the project, instructions for setting it up, and details about its features.
-
----
-
 # Modern File Downloader
 
 A sleek, modern, and dynamic file downloader application built in Java. This application allows users to download files from the internet with a user-friendly interface, real-time progress tracking, and advanced features like pause/resume functionality and URL fetching from the clipboard.
