@@ -22,7 +22,7 @@ A sleek, modern, and dynamic file downloader application built in Java. This app
 *Main Interface with URL and Save Location Inputs*
 
 ![Screenshot 2](screenshots/screenshot2.png)  
-*Real-Time Progress and Download Speed*
+*Real-Time Progress and Download Speed (Giving Max Speed Even Local Server Website or Slow Server Websites)*
 
 ---
 
