@@ -24,11 +24,14 @@ public class FileDownloader {
     private JTextField saveLocationTextField;
     private JLabel statusLabel;
     private JProgressBar progressBar;
-    private JButton downloadButton, pauseButton, fetchUrlButton;
+    private JButton downloadButton, pauseButton, fetchUrlButton, resetButton, cancelButton;
     private boolean isPaused = false;
+    private boolean isCancelled = false;
     private long downloadedBytes = 0;
     private long fileSize = 0;
     private List<String> downloadQueue = new ArrayList<>();
+    private List<String> downloadHistory = new ArrayList<>();
+    private boolean darkMode = false;
 
     public static void main(String[] args) {
         new FileDownloader().createAndShowGUI();
@@ -48,9 +51,7 @@ public class FileDownloader {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null); // Center the window
-        frame.getContentPane().setBackground(new Color(245, 245, 245)); // Light gray background\
-        ImageIcon icon = new ImageIcon("icon.png");
-        frame.setIconImage(icon.getImage());
+        frame.getContentPane().setBackground(new Color(245, 245, 245)); // Light gray background
     }
 
     private void addUIComponents() {
@@ -132,6 +133,21 @@ public class FileDownloader {
         frame.add(pauseButton);
 
         pauseButton.addActionListener(e -> togglePause());
+
+        // Cancel Button
+        cancelButton = createModernButton("Cancel", new Color(244, 67, 54), new Color(211, 47, 47));
+        cancelButton.setBounds(330, 270, 100, 45);
+        cancelButton.setEnabled(false); // Disabled by default
+        frame.add(cancelButton);
+
+        cancelButton.addActionListener(e -> cancelDownload());
+
+        // Reset Button
+        resetButton = createModernButton("Reset", new Color(156, 39, 176), new Color(123, 31, 162));
+        resetButton.setBounds(440, 270, 100, 45);
+        frame.add(resetButton);
+
+        resetButton.addActionListener(e -> resetFields());
 
         // Progress Bar
         progressBar = new JProgressBar(0, 100);
@@ -242,12 +258,31 @@ public class FileDownloader {
 
         downloadButton.setEnabled(false);
         pauseButton.setEnabled(true);
+        cancelButton.setEnabled(true);
         new Thread(() -> downloadFile(url, outputFile)).start();
     }
 
     private void togglePause() {
         isPaused = !isPaused;
         pauseButton.setText(isPaused ? "Resume" : "Pause");
+    }
+
+    private void cancelDownload() {
+        isCancelled = true;
+        statusLabel.setText("Download cancelled.");
+        downloadButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        cancelButton.setEnabled(false);
+    }
+
+    private void resetFields() {
+        urlTextField.setText("");
+        saveLocationTextField.setText(System.getProperty("user.home") + "/Downloads");
+        progressBar.setValue(0);
+        statusLabel.setText("Ready to download");
+        downloadButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        cancelButton.setEnabled(false);
     }
 
     private void downloadFile(String url, File outputFile) {
@@ -266,6 +301,11 @@ public class FileDownloader {
                 long startTime = System.currentTimeMillis();
 
                 while ((read = in.read(buffer, 0, 1024)) >= 0) {
+                    if (isCancelled) {
+                        statusLabel.setText("Download cancelled.");
+                        break;
+                    }
+
                     if (isPaused) {
                         Thread.sleep(100); // Pause download
                         continue;
@@ -285,13 +325,18 @@ public class FileDownloader {
                     statusLabel.setText(String.format("Downloaded %.2f%% (%.2f KB/s)", percentDownloaded, speed));
                 }
 
-                statusLabel.setText("Download Completed");
+                if (!isCancelled) {
+                    statusLabel.setText("Download Completed");
+                    downloadHistory.add("URL: " + url + " | File: " + outputFile.getName());
+                }
             }
         } catch (IOException | InterruptedException e) {
             statusLabel.setText("Error: " + e.getMessage());
         } finally {
             downloadButton.setEnabled(true);
             pauseButton.setEnabled(false);
+            cancelButton.setEnabled(false);
+            isCancelled = false;
         }
     }
 
