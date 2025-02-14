@@ -1,172 +1,159 @@
-package downloader;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
-import java.io.*;
-import java.awt.*;
-import java.net.*;
-import java.awt.event.*;
-import javax.swing.*;
+public class FileDownloader {
 
-class Downloader extends Thread{
-	
+    private JFrame frame;
+    private JTextField urlTextField;
+    private JTextField saveLocationTextField;
+    private JLabel statusLabel;
 
-	static JFrame f1;
-	static JFileChooser chooser;
-	static File file1;
-	static JButton b1, b2, b3;
-	static JTextField t1, t2;
-	static JLabel l1, l2, l3, l4;
-	static JProgressBar pb1;
-	static URL url;
+    public static void main(String[] args) {
+        new FileDownloader().createAndShowGUI();
+    }
 
-	static String link; // download url
-	static File out; // file
+    public void createAndShowGUI() {
+        initializeFrame();
+        addUIComponents();
+        frame.setVisible(true);
+    }
 
-	public Downloader(String link, File out) {
-		this.link = link;
-		this.out = out;
-	}
+    private void initializeFrame() {
+        frame = new JFrame();
+        frame.setSize(750, 310);
+        frame.setTitle("Fastest File Downloader");
+        frame.setLayout(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+        frame.setLocationByPlatform(true);
+        frame.getContentPane().setBackground(Color.WHITE);
+    }
 
-	static double percentDownloaded;
+    private void addUIComponents() {
+        // Title Label
+        JLabel titleLabel = new JLabel("<html><u style='color:navy;'>Faster File Downloader</u><html>");
+        titleLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
+        titleLabel.setBounds(250, 10, 350, 30);
+        titleLabel.setForeground(Color.RED);
+        frame.add(titleLabel);
 
-	public void run()
-	{
-		try
-		{
-			URL url=new URL(link);
-			HttpURLConnection http = (HttpURLConnection)url.openConnection();
-			double filesize = (double)http.getContentLengthLong();
-			
-			BufferedInputStream in = new BufferedInputStream(http.getInputStream());
-			@SuppressWarnings("static-access")
-			FileOutputStream fos = new FileOutputStream(this.out);
-			BufferedOutputStream bout = new BufferedOutputStream(fos,1024);
-			byte[] buffer = new byte[1024];
-			double Downloaded = 0.00;
-			int read=0;
-			percentDownloaded = 0.00;
-			while((read=in.read(buffer,0,1024))>=0) {
-			bout.write(buffer,0,read);	
-			Downloaded+=read;
-			percentDownloaded = (Downloaded*100)/filesize;
-		//	String percent = String.format("%4F", percentDownloaded);
-			l4.setText("Downloaded " + percentDownloaded + " % of file");
-			
-		
-			//l4.setText("Downloaded " + percent + " % of file");
-			}
-			bout.close();
-			in.close();
-			l4.setText("Download Completed");
-		//	System.out.println("Download Completed");
-			
-			
-		
-	}
-		catch(Exception r) {
-			}
-		}
+        // URL Label and TextField
+        JLabel urlLabel = new JLabel("<html><p style='color:navy; font-style:italic;'>Enter URL to Download file</p></html>");
+        urlLabel.setBounds(35, 60, 500, 20);
+        urlLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
+        frame.add(urlLabel);
 
-	public static void main(String args[]) {
-		
-		f1 = new JFrame();
-		f1.setSize(750, 310);
-		f1.setTitle("Fastest File Downloader");
+        urlTextField = new JTextField("Paste your URL here");
+        urlTextField.setFont(new Font("Times New Roman", Font.BOLD, 15));
+        urlTextField.setForeground(Color.RED);
+        urlTextField.setBounds(35, 85, 550, 30);
+        frame.add(urlTextField);
 
-		l1 = new JLabel();
-		l1.setText("<html><u style='color:navy;'>Faster File Downloader</u><html>");
-		l1.setFont(new Font("Times New Roman", Font.BOLD, 25));
-		l1.setBounds(250, 10, 350, 30);
+        // Save Location Label and TextField
+        JLabel saveLocationLabel = new JLabel("<html><p style='color:navy; font-style:italic;'>Enter Location to save file</p></html>");
+        saveLocationLabel.setBounds(35, 125, 500, 20);
+        saveLocationLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
+        frame.add(saveLocationLabel);
 
-		l1.setForeground(Color.red);
-		f1.add(l1);
+        saveLocationTextField = new JTextField("Preferred location to download file");
+        saveLocationTextField.setFont(new Font("Times New Roman", Font.BOLD, 15));
+        saveLocationTextField.setForeground(Color.RED);
+        saveLocationTextField.setBounds(35, 150, 450, 30);
+        frame.add(saveLocationTextField);
 
-		l2 = new JLabel();
-		l2.setText("<html><p style='color:navy; font-style:italic;'>Enter Url to Download file</p></html>");
-		l2.setBounds(35, 60, 500, 20);
-		l2.setFont(new Font("Times New Roman", Font.BOLD, 18));
-		f1.add(l2);
+        // Browse Button
+        JButton browseButton = new JButton("<html><p style='color:navy; font-style:italic;'>Browse</p></html>");
+        browseButton.setBackground(Color.WHITE);
+        browseButton.setBounds(490, 150, 90, 30);
+        frame.add(browseButton);
 
-		t1 = new JTextField();
-		t1.setText("pase your url");
-		t1.setFont(new Font("Times New Roman", Font.BOLD, 15));
-		t1.setForeground(Color.red);
-		t1.setBounds(35, 85, 550, 30);
-		f1.add(t1);
-		l3 = new JLabel();
-		l3.setText("<html><p style='color:navy; font-style:italic;'>Enter Location where to save files</p></html>");
-		l3.setBounds(35, 125, 500, 20);
-		l3.setFont(new Font("Times New Roman", Font.BOLD, 18));
-		f1.add(l3);
+        browseButton.addActionListener(e -> browseForSaveLocation());
 
-		t2 = new JTextField();
-		t2.setText("preferred location to download file");
-		t2.setFont(new Font("Times New Roman", Font.BOLD, 15));
-		t2.setForeground(Color.red);
-		t2.setBounds(35, 150, 450, 30);
-		f1.add(t2);
+        // Download Button
+        JButton downloadButton = new JButton("<html><p style='color:navy; font-style:italic;'>Start Download</p></html>");
+        downloadButton.setBackground(Color.WHITE);
+        downloadButton.setBounds(260, 200, 150, 30);
+        frame.add(downloadButton);
 
-		b1 = new JButton("<html><p style='color:navy; font-style:italic;'>Browse</p></html>");
-		b1.setBackground(Color.white);
-//b1.setText("Browse");
-		b1.setBounds(490, 150, 90, 30);
-		f1.add(b1);
+        downloadButton.addActionListener(e -> startDownload());
 
-		chooser = new JFileChooser();
+        // Status Label
+        statusLabel = new JLabel("");
+        statusLabel.setBounds(220, 240, 400, 30);
+        statusLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
+        frame.add(statusLabel);
+    }
 
-		b1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+    private void browseForSaveLocation() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File("."));
+        fileChooser.setDialogTitle("Select Directory");
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
 
+        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            saveLocationTextField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+        } else {
+            saveLocationTextField.setText("No Selection");
+        }
+    }
 
-				chooser.setCurrentDirectory(new java.io.File("."));
-				chooser.setDialogTitle("Select Directory");
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				chooser.setAcceptAllFileFilterUsed(false);
+    private void startDownload() {
+        String url = urlTextField.getText();
+        String saveLocation = saveLocationTextField.getText();
 
-				if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-					System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-					t2.setText("" + chooser.getSelectedFile());
-				} else {
-					t2.setText("No Selection ");
-				}
-			}
-		});
+        if (url.isEmpty() || saveLocation.isEmpty()) {
+            statusLabel.setText("Please provide both URL and save location.");
+            return;
+        }
 
-		b2 = new JButton("<html><p style='color:navy; font-style:italic;'>Start download</p></html>");
-		b2.setBackground(Color.white);
-//b1.setText("Browse");
-		b2.setBounds(260, 200, 150, 30);
-		f1.add(b2);
-		
-		b2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("Working");
-				
-				 link =t1.getText();
-//				  String link = "https://www.google.com/";
-				   out = new File(t2.getText());
-//				  File out = new File("abc.exe");
-				   
-				   new Thread(new Downloader(link,out)).start();
-//				   l4.setText("Downloaded " + percentDownloaded + " % of file");
-				   
-			}});
-l4 = new JLabel();
-l4.setText("");
-l4.setBounds(220,240,400,30);
-l4.setFont(new Font("Times New Roman", Font.BOLD, 18));
-f1.add(l4);
+        File outputFile = new File(saveLocation, getFileNameFromUrl(url));
 
-        
-        
-        
-       
-		f1.setBackground(Color.WHITE);
-		f1.setLayout(null);
-		f1.setLocationByPlatform(true);
-		f1.setDefaultCloseOperation(f1.EXIT_ON_CLOSE);
-		f1.setVisible(true);
-		f1.setResizable(false);
-	
+        new Thread(() -> downloadFile(url, outputFile)).start();
+    }
 
-	}
+    private void downloadFile(String url, File outputFile) {
+        try {
+            URL downloadUrl = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) downloadUrl.openConnection();
+            long fileSize = connection.getContentLengthLong();
+
+            try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+                 FileOutputStream fos = new FileOutputStream(outputFile);
+                 BufferedOutputStream bout = new BufferedOutputStream(fos, 1024)) {
+
+                byte[] buffer = new byte[1024];
+                long downloaded = 0;
+                int read;
+                while ((read = in.read(buffer, 0, 1024)) >= 0) {
+                    bout.write(buffer, 0, read);
+                    downloaded += read;
+                    double percentDownloaded = (downloaded * 100.0) / fileSize;
+                    statusLabel.setText(String.format("Downloaded %.2f%% of file", percentDownloaded));
+                }
+                statusLabel.setText("Download Completed");
+            }
+        } catch (IOException e) {
+            statusLabel.setText("Error during download: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private String getFileNameFromUrl(String url) {
+        return url.substring(url.lastIndexOf('/') + 1);
+    }
 }
